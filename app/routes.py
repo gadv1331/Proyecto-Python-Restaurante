@@ -14,7 +14,7 @@ from domain.schemas.user import UserCreate, User
 
 router = APIRouter()
 
-@router.post("/token")
+@router.post("/auth_user")
 def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user_repository = UserRepository(db)
     auth_service = AuthService(user_repository)
@@ -26,7 +26,6 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = auth_service.create_access_token_for_user(user)
-    print("token creado:",access_token)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -35,7 +34,7 @@ def read_users_me(current_user: UserSchema = Depends(get_current_active_user)):
     return current_user
 
 
-@router.post("/registro_usuario", response_model=User)
+@router.post("/user_register", response_model=User)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     user_repository = UserRepository(db)
     user_service = UserService(user_repository)
@@ -46,10 +45,10 @@ def get_chef_message(current_user: UserSchema = Depends(get_current_chef_user)):
     return {"message": "Hola, soy un chef"}
 
 @router.get("/camarero")
-def get_camarero_message(current_user: UserSchema = Depends(get_current_chef_user)):
+def get_camarero_message(current_user: UserSchema = Depends(get_current_camarero_user)):
     return {"message": "Hola, soy un camarero"}
 
 @router.get("/cliente")
-def get_cliente_message(current_user: UserSchema = Depends(get_current_chef_user)):
+def get_cliente_message(current_user: UserSchema = Depends(get_current_cliente_user)):
     return {"message": "Hola, soy un cliente"}
 

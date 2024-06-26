@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from infrastructure.db.schemas_orm.user import User as UserModel
 from domain.schemas.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth_user")
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
