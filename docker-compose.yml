@@ -1,0 +1,39 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: db
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWD}"
+      POSTGRES_DB: "${DB_NAME}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 15s
+      timeout: 15s
+      retries: 3
+
+  fastapiapp:
+    container_name: fastapiapp
+    restart: always
+    build: 
+      context: ./Proyecto-Python-Restaurante
+      dockerfile: dockerfile
+    environment:
+      DB_USER: "${DB_USER}"
+      DB_PASSWD: "${DB_PASSWD}"
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: "${DB_NAME}"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  postgres-data:
