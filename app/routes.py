@@ -10,6 +10,7 @@ from infrastructure.security.oauth2 import get_current_active_user
 from infrastructure.security.oauth2 import get_current_chef_user
 from infrastructure.security.oauth2 import get_current_camarero_user
 from infrastructure.security.oauth2 import get_current_cliente_user
+from infrastructure.security.oauth2 import get_current_admin_user
 from domain.schemas.user import UserCreate, User
 
 router = APIRouter()
@@ -41,7 +42,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return user_service.create_user(user)
 
 @router.get("/chef")
-def get_chef_message(current_user: UserSchema = Depends(get_current_chef_user)):
+def get_chef_message(current_user:UserSchema = Depends(get_current_chef_user)):
     return {"message": "Hola, soy un chef"}
 
 @router.get("/camarero")
@@ -52,3 +53,6 @@ def get_camarero_message(current_user: UserSchema = Depends(get_current_camarero
 def get_cliente_message(current_user: UserSchema = Depends(get_current_cliente_user)):
     return {"message": "Hola, soy un cliente"}
 
+@router.get("/admin")
+def get_admin_message(current_user: UserSchema = Depends(get_current_admin_user)):
+    return {"message": "Hola, soy un admin"}
