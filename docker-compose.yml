@@ -22,7 +22,7 @@ services:
     container_name: fastapiapp
     restart: always
     build: 
-      context: ./Proyecto-Python-Restaurante
+      context: ./
       dockerfile: dockerfile
     environment:
       DB_USER: "${DB_USER}"

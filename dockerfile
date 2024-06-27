@@ -1,17 +1,21 @@
-# Use una imagen base de Python
+# Use a base Python image
 FROM python:3.9
 
-# Establecer el directorio de trabajo
+# Set the working directory
 WORKDIR /app
 
-# Copiar los archivos del proyecto
-COPY . .
+# Copy the requirements file
+COPY requirements.txt ./
 
-# Instalar las dependencias
+# Install dependencies
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exponer el puerto que utilizará FastAPI
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port used by FastAPI
 EXPOSE 8000
 
-# Ejecutar la aplicación FastAPI
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run the FastAPI application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
