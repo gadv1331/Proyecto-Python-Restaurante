@@ -17,14 +17,14 @@ class DishService:
         return self.dish_repository.delete_dish(dish_id)
     
     def get_dish(self, dish_id: int) -> Optional[Dish]:
-        db_dish = self.dish_repository.get_dish(dish_id)
+        db_dish = self.dish_repository.get_dish_by_id(dish_id)
         if db_dish:
-            return Dish.from_orm(db_dish)
+            return db_dish
         return None
     
     def get_all_dishes(self) -> List[Dish]:
         db_dishes = self.dish_repository.get_all_dishes()
-        return [Dish.from_orm(dish) for dish in db_dishes]
+        return [dish for dish in db_dishes]
     
     def add_recipe_to_dish(self, dish_id: int, recipe_data: RecipeCreate) -> Optional[Recipe]:
         return self.dish_repository.add_recipe_to_dish(dish_id, recipe_data)
@@ -37,7 +37,7 @@ class DishService:
     
     def get_recipes_of_dish(self, dish_id: int) -> List[Recipe]:
         db_recipes = self.dish_repository.get_recipes_of_dish(dish_id)
-        return [Recipe.from_orm(recipe) for recipe in db_recipes]
+        return [recipe for recipe in db_recipes]
     
 
     

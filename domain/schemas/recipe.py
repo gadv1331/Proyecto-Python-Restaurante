@@ -12,7 +12,7 @@ class Recipe(BaseModel):
     ing_id_fk: int
 
     class Config:
-        orm_mode = True
+        from_orm = True
 
 
 

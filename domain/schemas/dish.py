@@ -12,4 +12,4 @@ class Dish(BaseModel):
     dis_price_by_unit: float
 
     class Config:
-        orm_mode = True
+        from_orm = True

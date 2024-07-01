@@ -2,13 +2,14 @@ from sqlalchemy.orm import Session
 from infrastructure.db.schemas_orm.dish import Dish as DishModel
 from infrastructure.db.schemas_orm.recipe import Recipe as RecipeModel
 from domain.schemas.dish import DishCreate
+from typing import List 
 
 class DishRepository:
     def __init__(self, db: Session):
         self.db = db
 
     def get_dish_by_id(self, dish_id: int) -> DishModel:
-        return self.db.query(DishModel).filter(DishModel.id == dish_id).first()
+        return self.db.query(DishModel).filter(DishModel.dis_id == dish_id).first()
     
     def get_all_dishes(self) -> list[DishModel]:
         return self.db.query(DishModel).all()
@@ -50,7 +51,7 @@ class DishRepository:
     def remove_recipe_from_dish(self, dish_id: int, recipe_id: int):
         db_dish = self.get_dish_by_id(dish_id)
         if db_dish:
-            db_recipe = self.db.query(RecipeModel).filter(RecipeModel.id == recipe_id, RecipeModel.dis_id_fk == dish_id).first()
+            db_recipe = self.db.query(RecipeModel).filter(RecipeModel.rec_id == recipe_id, RecipeModel.dis_id_fk == dish_id).first()
             if db_recipe:
                 self.db.delete(db_recipe)
                 self.db.commit()
@@ -60,7 +61,7 @@ class DishRepository:
     def update_recipe_of_dish(self, dish_id: int, recipe_id: int, recipe_data):
         db_dish = self.get_dish_by_id(dish_id)
         if db_dish:
-            db_recipe = self.db.query(RecipeModel).filter(RecipeModel.id == recipe_id, RecipeModel.dis_id_fk == dish_id).first()
+            db_recipe = self.db.query(RecipeModel).filter(RecipeModel.rec_id == recipe_id, RecipeModel.dis_id_fk == dish_id).first()
             if db_recipe:
                 for key, value in recipe_data.dict(exclude_unset = True).items():
                     setattr(db_recipe, key, value)
@@ -75,5 +76,5 @@ class DishRepository:
             return self.db.query(RecipeModel).filter(RecipeModel.dis_id_fk == dish_id).all()
         return []
     
-    
+
     
