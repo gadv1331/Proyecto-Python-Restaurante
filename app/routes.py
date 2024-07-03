@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from typing import List
 from domain.services.auth_service import AuthService
 from domain.services.user_service import UserService
 from domain.services.dish_service import DishService
+from domain.services.menu_service import MenuService
 from infrastructure.db.database import get_db
 from infrastructure.db.repositories.user_repository import UserRepository
 from infrastructure.db.repositories.dish_repository import DishRepository
+from infrastructure.db.repositories.menu_repository import MenuRepository
 from domain.schemas.user import User as UserSchema
 from infrastructure.security.oauth2 import get_current_active_user
 from infrastructure.security.oauth2 import get_current_chef_user
@@ -16,6 +19,7 @@ from infrastructure.security.oauth2 import get_current_admin_user
 from domain.schemas.user import UserCreate, User
 from domain.schemas.dish import DishCreate, Dish
 from domain.schemas.recipe import RecipeCreate, Recipe
+from domain.schemas.menu import Menu, MenuCreate
 
 router = APIRouter()
 
@@ -82,14 +86,14 @@ def update_dish(dish_id: int, dish: DishCreate, db: Session = Depends(get_db)):
         return updated_dish
     raise HTTPException(status_code = 404, detail = "Plato no encontrado")
 
-@router.delete("/dishes/{dish_id}", response_model = Dish)
+@router.delete("/dishes/{dish_id}", response_model=Dish)
 def delete_dish(dish_id: int, db: Session = Depends(get_db)):
     dish_repository = DishRepository(db)
     dish_service = DishService(dish_repository)
     deleted_dish = dish_service.delete_dish(dish_id)
     if deleted_dish:
-        return deleted_dish
-    raise HTTPException(status_code = 404, detail = "Plato no encontrado")
+        return Dish.from_orm(deleted_dish)
+    raise HTTPException(status_code=404, detail="Plato no encontrado")
 
 @router.get("/dishes/{dish_id}", response_model = Dish)
 def get_dish(dish_id: int, db: Session = Depends(get_db)):
@@ -97,20 +101,21 @@ def get_dish(dish_id: int, db: Session = Depends(get_db)):
     dish_service = DishService(dish_repository)
     dish = dish_service.get_dish(dish_id)
     if dish:
-        return dish
+        return Dish.from_orm(dish)
     raise HTTPException(status_code = 404, detail = "Plato no encontrado")
 
-@router.get("/dishes/", response_model = Dish)
+@router.get("/dishes/", response_model = List[Dish])
 def get_all_dishes(db: Session = Depends(get_db)):
     dish_repository = DishRepository(db)
     dish_service = DishService(dish_repository)
-    return dish_service.get_all_dishes()
+    dishes = dish_service.get_all_dishes()
+    return [Dish.from_orm(dish) for dish in dishes]
 
 #RECETAS
 
 @router.post("/dishes/{dish_id}/recipes/", response_model = Recipe)
 def add_recipe_to_dish(dish_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
-    dish_reository = dishRepository(db)
+    dish_reository = DishRepository(db)
     dish_service = DishService(dish_reository)
     added_recipe = dish_service.add_recipe_to_dish(dish_id, recipe)
     if added_recipe:
@@ -118,29 +123,68 @@ def add_recipe_to_dish(dish_id: int, recipe: RecipeCreate, db: Session = Depends
     raise HTTPException(status_code = 404, detail = "Plato no encontrado")
 
 @router.put("/dishes/{dish_id}/recipes/{recipe_id}", response_model = Recipe)
-def update_recipe_in_dish(dish_id: int, recipe_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
+def update_recipe_of_dish(dish_id: int, recipe_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
     dish_reository = DishRepository(db)
     dish_service = DishService(dish_reository)
-    updated_recipe = dish_service.update_recipe_in_dish(dish_id, recipe_id, recipe)
+    updated_recipe = dish_service.update_recipe_of_dish(dish_id, recipe_id, recipe)
     if updated_recipe:
         return updated_recipe
     raise HTTPException(status_code = 404, detail = "Plato o receta no encontrados")
 
 @router.delete("/dishes/{dish_id}/recipes/{recipe_id}", response_model = Recipe)
-def delete_recipe_from_dish(dish_id: int, recipe_id: int, db: Session = Depends(get_db)):
+def remove_recipe_from_dish(dish_id: int, recipe_id: int, db: Session = Depends(get_db)):
     dish_reository = DishRepository(db)
     dish_service = DishService(dish_reository)
-    deleted_recipe = dish_service.delete_recipe_from_dish(dish_id, recipe_id)
-    if deleted_recipe:
-        return deleted_recipe
-    raise HTTPException(status_code = 404, detail = "Plato o receta no encontrados")
+    removed_recipe = dish_service.remove_recipe_from_dish(dish_id, recipe_id)
+    if removed_recipe:
+        return Recipe.from_orm(removed_recipe)
+    raise HTTPException(status_code=404, detail="Receta o plato no encontrados")
 
-@router.get("/dishes/{dish_id}/recipes/", response_model = Recipe)
-def get_recipe_of_dish(dish_id: int, db: Session = Depends(get_db)):
+@router.get("/dishes/{dish_id}/recipes/", response_model = List[Recipe])
+def get_recipes_of_dish(dish_id: int, db: Session = Depends(get_db)):
     dish_repository = DishRepository(db)
     dish_service = DishService(dish_repository)
     recipes = dish_service.get_recipes_of_dish(dish_id)
-    if recipes:
-        return recipes
-    raise HTTPException(status_code = 404, detail = "Plato no encontrado")
+    return [Recipe.from_orm(recipe) for recipe in recipes]
 
+# MENUS
+
+@router.post("/menus/", response_model = Menu)
+def create_menu(menu: MenuCreate, db: Session = Depends(get_db)):
+    menu_repository = MenuRepository(db)
+    menu_service = MenuService(menu_repository)
+    return menu_service.create_menu(menu)
+
+@router.post("/menus/{menu_id}/dishes/{dish_id}", response_model = Menu)
+def add_dish_to_menu(menu_id: int, dish_id: int, db: Session = Depends(get_db)):
+    menu_repository = MenuRepository(db)
+    menu_service = MenuService(menu_repository)
+    added_dish = menu_service.add_dish_to_menu(menu_id, dish_id)
+    if added_dish:
+        return Menu.from_orm(added_dish)
+    raise HTTPException(status_code = 404, detail = "Menu o plato no encontrados")
+
+@router.delete("/menus/{menu_id}/dishes/{dish_id}", response_model = Menu)
+def remove_dish_from_menu(menu_id: int, dish_id: int, db: Session = Depends(get_db)):
+    menu_repository = MenuRepository(db)
+    menu_service = MenuService(menu_repository)
+    removed_dish = menu_service.remove_dish_from_menu(menu_id, dish_id)
+    if removed_dish:
+        return Menu.from_orm(removed_dish)
+    raise HTTPException(status_code=404, detail="Menu o plato no encontrados")
+
+@router.get("/menus/{menu_id}", response_model = Menu)
+def get_menu(menu_id: int, db: Session = Depends(get_db)):
+    menu_repository = MenuRepository(db)
+    menu_service = MenuService(menu_repository)
+    menu = menu_service.get_menu(menu_id)
+    if menu:
+        return Menu.from_orm(menu)
+    raise HTTPException(status_code = 404, detail = "Menu no encontrado")
+
+@router.get("/menus/", response_model = List[Menu])
+def get_all_menus(db: Session = Depends(get_db)):
+    menu_repository = MenuRepository(db)
+    menu_service = MenuService(menu_repository)
+    menus = menu_service.get_all_menus()
+    return [Menu.from_orm(menu) for menu in menus]
