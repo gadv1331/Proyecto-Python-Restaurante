@@ -6,11 +6,13 @@ from domain.services.auth_service import AuthService
 from domain.services.user_service import UserService
 from domain.services.dish_service import DishService
 from domain.services.menu_service import MenuService
+from domain.services.order_service import OrderService
 from domain.services.ingredient_service import IngredientService
 from infrastructure.db.database import get_db
 from infrastructure.db.repositories.user_repository import UserRepository
 from infrastructure.db.repositories.dish_repository import DishRepository
 from infrastructure.db.repositories.menu_repository import MenuRepository
+from infrastructure.db.repositories.order_repository import OrderRepository
 from infrastructure.db.repositories.ingredient_repository import IngredientRepository
 from domain.schemas.user import User as UserSchema
 from infrastructure.security.oauth2 import get_current_active_user
@@ -23,6 +25,7 @@ from domain.schemas.dish import Dish, DishCreate
 from domain.schemas.menu import Menu, MenuCreate
 from domain.schemas.recipe import Recipe, RecipeCreate
 from domain.schemas.ingredient import Ingredient, IngredientCreate, IngredientUpdate
+from domain.schemas.order import Order, OrderCreate, OrderUpdate
 
 router = APIRouter()
 
@@ -244,3 +247,61 @@ def get_all_menus(db: Session = Depends(get_db)):
     menu_service = MenuService(menu_repository)
     menus = menu_service.get_all_menus()
     return [Menu.from_orm(menu) for menu in menus]
+
+# --------------------------------
+# ENDPOINTS PARA ORDENES
+# --------------------------------
+
+@router.post("/orders/", response_model=Order)
+def create_order(order: OrderCreate, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    return order_service.create_order(order)
+
+@router.get("/orders/{order_id}", response_model=Order)
+def get_order(order_id: int, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    order = order_service.get_order(order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+@router.put("/orders/{order_id}", response_model=Order)
+def update_order(order_id: int, order_data: OrderUpdate, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    updated_order = order_service.update_order(order_id, order_data)
+    if not updated_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return updated_order
+
+@router.get("/orders/user/{user_id}", response_model=List[Order])
+def get_orders_by_user(user_id: int, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    orders = order_service.get_orders_by_user(user_id)
+    return orders
+
+@router.get("/orders/menu/{menu_id}", response_model=List[Order])
+def get_orders_by_menu(menu_id: int, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    orders = order_service.get_orders_by_menu(menu_id)
+    return orders
+
+@router.get("/orders/", response_model=List[Order])
+def get_all_orders(db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    orders = order_service.get_all_orders()
+    return orders
+
+@router.delete("/orders/{order_id}", response_model=Order)
+def delete_order(order_id: int, db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    deleted_order = order_service.delete_order(order_id)
+    if not deleted_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return deleted_order
