@@ -26,8 +26,8 @@ class DishService:
     def get_all_dishes(self) -> List[Dish]:
         return self.dish_repository.get_all_dishes()
     
-    def add_recipe_to_dish(self, dish_id: int, recipe_data: RecipeCreate) -> Optional[Recipe]:
-        added_recipe = self.dish_repository.add_recipe_to_dish(dish_id, recipe_data)
+    def add_recipe_to_dish(self, dish_id: int, ingredient_id: int, quantity: int) -> Optional[Recipe]:
+        added_recipe = self.dish_repository.add_recipe_to_dish(dish_id, ingredient_id, quantity)
         return added_recipe
     
     def remove_recipe_from_dish(self, dish_id: int, recipe_id: int) -> Optional[Recipe]:

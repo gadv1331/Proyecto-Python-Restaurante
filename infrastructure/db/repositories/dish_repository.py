@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from infrastructure.db.schemas_orm.dish import Dish as DishModel
 from infrastructure.db.schemas_orm.recipe import Recipe as RecipeModel
+from infrastructure.db.schemas_orm.ingredient import Ingredient as IngredientModel
 from domain.schemas.dish import DishCreate
 from domain.schemas.recipe import RecipeCreate
 from typing import List, Optional
@@ -39,15 +40,22 @@ class DishRepository:
             return db_dish
         return None
 
-    def add_recipe_to_dish(self, dish_id: int, recipe_data: RecipeCreate) ->Optional[RecipeModel]:
-        db_dish = self.get_dish_by_id(dish_id)
-        if(db_dish):
-            db_recipe = RecipeModel(dis_id_fk = dish_id, **recipe_data.dict())
-            self.db.add(db_recipe)
+    def add_recipe_to_dish(self, dish_id: int, ingredient_id: int, quantity: int) -> Optional[RecipeModel]:
+        db_dish = self.db.query(DishModel).filter(DishModel.dis_id == dish_id).first()
+        db_ingredient = self.db.query(IngredientModel).filter(IngredientModel.id == ingredient_id).first()
+        if db_dish and db_ingredient:
+            new_recipe = RecipeModel(
+                dis_id_fk=dish_id,
+                ing_id_fk=ingredient_id,
+                rec_quantity=quantity
+            )
+            self.db.add(new_recipe)
             self.db.commit()
-            self.db.refresh(db_recipe)
-            return db_recipe
+            self.db.refresh(new_recipe)
+            return new_recipe
         return None
+
+
 
     def remove_recipe_from_dish(self, dish_id: int, recipe_id: int) -> Optional[RecipeModel]:
         db_recipe = self.db.query(RecipeModel).filter(RecipeModel.dis_id_fk == dish_id, RecipeModel.rec_id == recipe_id).first()

@@ -6,10 +6,12 @@ from domain.services.auth_service import AuthService
 from domain.services.user_service import UserService
 from domain.services.dish_service import DishService
 from domain.services.menu_service import MenuService
+from domain.services.ingredient_service import IngredientService
 from infrastructure.db.database import get_db
 from infrastructure.db.repositories.user_repository import UserRepository
 from infrastructure.db.repositories.dish_repository import DishRepository
 from infrastructure.db.repositories.menu_repository import MenuRepository
+from infrastructure.db.repositories.ingredient_repository import IngredientRepository
 from domain.schemas.user import User as UserSchema
 from infrastructure.security.oauth2 import get_current_active_user
 from infrastructure.security.oauth2 import get_current_chef_user
@@ -17,6 +19,10 @@ from infrastructure.security.oauth2 import get_current_camarero_user
 from infrastructure.security.oauth2 import get_current_cliente_user
 from infrastructure.security.oauth2 import get_current_admin_user
 from domain.schemas.user import UserCreate, User
+from domain.schemas.dish import Dish, DishCreate
+from domain.schemas.menu import Menu, MenuCreate
+from domain.schemas.recipe import Recipe, RecipeCreate
+from domain.schemas.ingredient import Ingredient, IngredientCreate, IngredientUpdate
 
 router = APIRouter()
 
@@ -164,10 +170,10 @@ def get_all_dishes(db: Session = Depends(get_db)):
 #RECETAS
 
 @router.post("/dishes/{dish_id}/recipes/", response_model = Recipe)
-def add_recipe_to_dish(dish_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
+def add_recipe_to_dish(dish_id: int, ingredient_id: int, quantity: int, db: Session = Depends(get_db)):
     dish_reository = DishRepository(db)
     dish_service = DishService(dish_reository)
-    added_recipe = dish_service.add_recipe_to_dish(dish_id, recipe)
+    added_recipe = dish_service.add_recipe_to_dish(dish_id, ingredient_id, quantity)
     if added_recipe:
         return added_recipe
     raise HTTPException(status_code = 404, detail = "Plato no encontrado")
