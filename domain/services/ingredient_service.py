@@ -10,7 +10,7 @@ class IngredientService:
         db_ingredients = self.repository.get_all_ingredients()
         return [ingredient for ingredient in db_ingredients]
     
-    def get_ingridient_by_id(self, ingredient_id: int) -> Optional[Dish]:
+    def get_ingridient_by_id(self, ingredient_id: int) -> Optional[Ingredient]:
         db_ingredient = self.repository.get_ingredient_by_id(ingredient_id)
         if db_ingredient:
             return db_ingredient

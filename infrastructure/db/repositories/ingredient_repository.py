@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from infrastructure.db.schemas_orm.ingredient import Ingredient
+from infrastructure.db.schemas_orm.ingredient import Ingredient as IngredientModel
 from domain.schemas.ingredient import IngredientCreate
 from typing import List
 
@@ -7,14 +7,14 @@ class IngredientRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all_ingredients(self) -> list[Ingredient]:
-        return self.db.query(Ingredient).all()
+    def get_all_ingredients(self) -> list[IngredientModel]:
+        return self.db.query(IngredientModel).all()
     
-    def get_ingredient_by_id(self, ingredient_id: int) -> Ingredient:
-        return self.db.query(Ingredient).filter(Ingredient.id == ingredient_id).first()
+    def get_ingredient_by_id(self, ingredient_id: int) -> IngredientModel:
+        return self.db.query(IngredientModel).filter(IngredientModel.id == ingredient_id).first()
     
     def create_ingredient(self, new_ingredient: IngredientCreate):
-        db_ing = Ingredient(**new_ingredient.dict())
+        db_ing = IngredientModel(**new_ingredient.dict())
         self.db.add(db_ing)
         self.db.commit()
         self.db.refresh(db_ing)
