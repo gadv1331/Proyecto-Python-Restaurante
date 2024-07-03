@@ -12,8 +12,9 @@ from infrastructure.security.oauth2 import get_current_camarero_user
 from infrastructure.security.oauth2 import get_current_cliente_user
 from infrastructure.security.oauth2 import get_current_admin_user
 from domain.schemas.user import UserCreate, User
+from typing import List
 #gestion de inventario
-from domain.schemas.ingredient import Ingredient, IngredientCreate
+from domain.schemas.ingredient import Ingredient, IngredientCreate, IngredientUpdate
 from domain.services.ingredient_service import IngredientService
 from infrastructure.db.repositories.ingredient_repository import IngredientRepository
 
@@ -72,7 +73,7 @@ def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db
     return ingredient_service.create_ingredient(ingredient)
 
 @router.put("/ingredients/", response_model = Ingredient)
-def update_ingredient(ingredient_id: int, ingredient: IngredientCreate, db: Session = Depends(get_db)):
+def update_ingredient(ingredient_id: int, ingredient: IngredientUpdate, db: Session = Depends(get_db)):
     ingredient_repository = IngredientRepository(db)
     ingredient_service = IngredientService(ingredient_repository)
     updated_ingredient = ingredient_service.update_ingredient(ingredient_id, ingredient)
@@ -89,7 +90,13 @@ def delete_ingredient(ingredient_id: int, db: Session = Depends(get_db)):
         return deleted_ingredient
     raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
 
-@router.get("/ingredients/", response_model = Ingredient)
+@router.get("/ingredients/", response_model = List[Ingredient])
+def get_all_ingredients(db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    return ingredient_service.get_all_ingredients()
+
+@router.get("/ingredients/{ingridient_id}", response_model = Ingredient)
 def get_ingredient(ingredient_id: int, db:Session = Depends(get_db)):
     ingredient_repository = IngredientRepository(db)
     ingredient_service = IngredientService(ingredient_repository)
@@ -97,9 +104,3 @@ def get_ingredient(ingredient_id: int, db:Session = Depends(get_db)):
     if ingredient:
         return ingredient
     raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
-
-@router.get("/ingredients/{ingridient_id}", response_model = Ingredient)
-def get_all_ingredients(db: Session = Depends(get_db)):
-    ingredient_repository = IngredientRepository(db)
-    ingredient_service = IngredientService(ingredient_repository)
-    return ingredient_service.get_all_ingredients()

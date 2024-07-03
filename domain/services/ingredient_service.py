@@ -1,5 +1,5 @@
 from infrastructure.db.repositories.ingredient_repository import IngredientRepository
-from domain.schemas.ingredient import IngredientCreate, Ingredient
+from domain.schemas.ingredient import IngredientCreate, Ingredient, IngredientUpdate
 from typing import List, Optional
 
 class IngredientService:
@@ -22,5 +22,5 @@ class IngredientService:
     def delete_ingredient(self, ingredient_id:int):
         return self.repository.delete_ingredient(ingredient_id)
     
-    def update_ingredient(self, ingredient_id: int, ingredient_data: IngredientCreate):
+    def update_ingredient(self, ingredient_id: int, ingredient_data: IngredientUpdate):
         return self.repository.update_ingredient(ingredient_id, ingredient_data)

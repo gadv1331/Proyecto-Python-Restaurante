@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 
+class IngredientUpdate(BaseModel):
+    name:str
+    description:str
+    
 class IngredientCreate(BaseModel):
     name:str
     description:str
