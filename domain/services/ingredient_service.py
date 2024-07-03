@@ -3,7 +3,7 @@ from domain.schemas.ingredient import IngredientCreate, Ingredient
 from typing import List, Optional
 
 class IngredientService:
-    def __init__(self, repository: IngredientRepository)
+    def __init__(self, repository: IngredientRepository):
         self.repository = repository
 
     def get_all_ingredients(self) -> List[Ingredient]:
