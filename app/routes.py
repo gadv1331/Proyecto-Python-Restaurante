@@ -12,6 +12,11 @@ from infrastructure.security.oauth2 import get_current_camarero_user
 from infrastructure.security.oauth2 import get_current_cliente_user
 from infrastructure.security.oauth2 import get_current_admin_user
 from domain.schemas.user import UserCreate, User
+from typing import List
+#gestion de inventario
+from domain.schemas.ingredient import Ingredient, IngredientCreate, IngredientUpdate
+from domain.services.ingredient_service import IngredientService
+from infrastructure.db.repositories.ingredient_repository import IngredientRepository
 
 router = APIRouter()
 
@@ -56,3 +61,56 @@ def get_cliente_message(current_user: UserSchema = Depends(get_current_cliente_u
 @router.get("/admin")
 def get_admin_message(current_user: UserSchema = Depends(get_current_admin_user)):
     return {"message": "Hola, soy un admin"}
+
+#-----------------------------------------------
+#ENDPOINTS PARA GESTION DE INVENTARIO
+#----------------------------------------------
+
+@router.post("/ingredients/", response_model = Ingredient)
+def create_ingredient(ingredient: IngredientCreate, db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    return ingredient_service.create_ingredient(ingredient)
+
+@router.put("/ingredients/", response_model = Ingredient)
+def update_ingredient(ingredient_id: int, ingredient: IngredientUpdate, db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    updated_ingredient = ingredient_service.update_ingredient(ingredient_id, ingredient)
+    if updated_ingredient:
+        return updated_ingredient
+    raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+
+@router.put("/ingredients/update_quantity", response_model = Ingredient)
+def update_quantity(ingredient_id: int, quantity_change: float, db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    update_ingredient = ingredient_service.update_quantity(ingredient_id, quantity_change)
+    if update_ingredient:
+        return update_ingredient
+    raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+
+@router.delete("/ingredients/", response_model = Ingredient)
+def delete_ingredient(ingredient_id: int, db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    deleted_ingredient = ingredient_service.delete_ingredient(ingredient_id)
+    if deleted_ingredient:
+        return deleted_ingredient
+    raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+
+@router.get("/ingredients/", response_model = List[Ingredient])
+def get_all_ingredients(db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    return ingredient_service.get_all_ingredients()
+
+@router.get("/ingredients/{ingridient_id}", response_model = Ingredient)
+def get_ingredient(ingredient_id: int, db:Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    ingredient = ingredient_service.get_ingridient_by_id(ingredient_id)
+    if ingredient:
+        return ingredient
+    raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+
