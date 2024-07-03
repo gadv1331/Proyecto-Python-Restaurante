@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from typing import List
 from domain.services.auth_service import AuthService
 from domain.services.user_service import UserService
@@ -18,6 +19,7 @@ from infrastructure.security.oauth2 import get_current_chef_user
 from infrastructure.security.oauth2 import get_current_camarero_user
 from infrastructure.security.oauth2 import get_current_cliente_user
 from infrastructure.security.oauth2 import get_current_admin_user
+from infrastructure.exceptions.exc_user import UserAlreadyExistsException
 from domain.schemas.user import UserCreate, User
 from domain.schemas.dish import Dish, DishCreate
 from domain.schemas.menu import Menu, MenuCreate
@@ -46,11 +48,24 @@ def read_users_me(current_user: UserSchema = Depends(get_current_active_user)):
     return current_user
 
 
+#@router.post("/user_register", response_model=User)
+#def create_user(user: UserCreate, db: Session = Depends(get_db)):
+#    user_repository = UserRepository(db)
+#    user_service = UserService(user_repository)
+#    return user_service.create_user(user)
+
 @router.post("/user_register", response_model=User)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     user_repository = UserRepository(db)
     user_service = UserService(user_repository)
-    return user_service.create_user(user)
+    try:
+        created_user = user_service.create_user(user)
+        return created_user
+    except UserAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already exists",
+        )
 
 @router.get("/chef")
 def get_chef_message(current_user:UserSchema = Depends(get_current_chef_user)):
