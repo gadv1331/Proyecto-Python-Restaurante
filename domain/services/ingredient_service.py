@@ -24,3 +24,6 @@ class IngredientService:
     
     def update_ingredient(self, ingredient_id: int, ingredient_data: IngredientUpdate):
         return self.repository.update_ingredient(ingredient_id, ingredient_data)
+    
+    def update_quantity(self, ingredient_id: int, quantity_change: float):
+        return self.repository.update_quantity(ingredient_id,quantity_change)

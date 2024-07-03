@@ -81,6 +81,15 @@ def update_ingredient(ingredient_id: int, ingredient: IngredientUpdate, db: Sess
         return updated_ingredient
     raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
 
+@router.put("/ingredients/update_quantity", response_model = Ingredient)
+def update_quantity(ingredient_id: int, quantity_change: float, db: Session = Depends(get_db)):
+    ingredient_repository = IngredientRepository(db)
+    ingredient_service = IngredientService(ingredient_repository)
+    update_ingredient = ingredient_service.update_quantity(ingredient_id, quantity_change)
+    if update_ingredient:
+        return update_ingredient
+    raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+
 @router.delete("/ingredients/", response_model = Ingredient)
 def delete_ingredient(ingredient_id: int, db: Session = Depends(get_db)):
     ingredient_repository = IngredientRepository(db)
@@ -104,3 +113,4 @@ def get_ingredient(ingredient_id: int, db:Session = Depends(get_db)):
     if ingredient:
         return ingredient
     raise HTTPException(status_code = 404, detail = "Ingrediente no encontrado")
+

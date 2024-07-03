@@ -36,3 +36,15 @@ class IngredientRepository:
             self.db.commit()
             self.db.refresh(db_ingredient)
             return db_ingredient
+        
+    def update_quantity(self, ingredient_id: int, quantity_change: float):
+        db_ingredient = self.get_ingredient_by_id(ingredient_id)
+        if (db_ingredient):
+            new_quantity = db_ingredient.quantity + quantity_change
+            if new_quantity < 0:
+                new_quantity = 0
+            setattr(db_ingredient, "quantity", new_quantity)
+            self.db.commit()
+            self.db.refresh(db_ingredient)
+            return db_ingredient
+
