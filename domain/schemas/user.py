@@ -14,3 +14,13 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: str
+
+
+class UserCliente(BaseModel):
+    id: int
+    username: str
+    email: str
+    class Config:
+        from_attributes = True
+        from_orm = True
+        orm_mode = True

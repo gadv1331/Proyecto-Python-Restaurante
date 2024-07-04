@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from app.routes import router
 from infrastructure.db.database import engine, Base
 
-# Crear las tablas en la base de datos
+# Creacion las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Incluir los routers
+#Las rutas de los endpoints
 app.include_router(router, prefix="/api/v1", tags=["router"])
 
 
