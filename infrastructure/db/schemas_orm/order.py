@@ -1,13 +1,12 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Table, Float, DateTime
 from sqlalchemy.orm import relationship
 from infrastructure.db.database import Base
-from infrastructure.db.schemas_orm.menu import Menu
 
-order_menu_association = Table(
-    'order_menu_association',
+order_dish_association = Table(
+    'order_dish_association',
     Base.metadata,
     Column('order_id', Integer, ForeignKey('orders.ord_id')),
-    Column('menus_id', Integer, ForeignKey('menus.men_id'))
+    Column('dish_id', Integer, ForeignKey('dish.dis_id'))
 )
 
 class Order(Base):
@@ -17,6 +16,5 @@ class Order(Base):
     ord_price = Column(Float)
     ord_date = Column(DateTime)
     ord_status = Column(String)
-    menu_list= relationship("Menu", secondary = order_menu_association, back_populates="orders")
+    dish_list = relationship("Dish", secondary=order_dish_association, back_populates="orders")
     user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship("User", backref="orders")

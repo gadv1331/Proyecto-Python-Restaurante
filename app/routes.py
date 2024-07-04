@@ -264,7 +264,7 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
     order_service = OrderService(order_repository)
     order = order_service.get_order(order_id)
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Orden no encontrada")
     return order
 
 @router.put("/orders/{order_id}", response_model=Order)
@@ -273,7 +273,7 @@ def update_order(order_id: int, order_data: OrderUpdate, db: Session = Depends(g
     order_service = OrderService(order_repository)
     updated_order = order_service.update_order(order_id, order_data)
     if not updated_order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Orden no encontrada")
     return updated_order
 
 @router.get("/orders/user/{user_id}", response_model=List[Order])
@@ -283,11 +283,11 @@ def get_orders_by_user(user_id: int, db: Session = Depends(get_db)):
     orders = order_service.get_orders_by_user(user_id)
     return orders
 
-@router.get("/orders/menu/{menu_id}", response_model=List[Order])
-def get_orders_by_menu(menu_id: int, db: Session = Depends(get_db)):
+@router.get("/orders/dish/{dish_id}", response_model=List[Order])
+def get_orders_by_dish(dish_id: int, db: Session = Depends(get_db)):
     order_repository = OrderRepository(db)
     order_service = OrderService(order_repository)
-    orders = order_service.get_orders_by_menu(menu_id)
+    orders = order_service.get_orders_by_dish(dish_id)
     return orders
 
 @router.get("/orders/", response_model=List[Order])
@@ -303,5 +303,15 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
     order_service = OrderService(order_repository)
     deleted_order = order_service.delete_order(order_id)
     if not deleted_order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Orden no encontrada")
     return deleted_order
+
+@router.post("/orders/{order_id}/dishes/{dish_id}", response_model=Order)
+def add_dish_to_order(order_id: int, dish_id: int,db: Session = Depends(get_db)):
+    order_repository = OrderRepository(db)
+    order_service = OrderService(order_repository)
+    updated_order = order_service.add_dish_to_order(order_id, dish_id)
+    if updated_order:
+        return updated_order
+    else:
+        raise HTTPException(status_code=404, detail="Orden o plato no encontrado.")

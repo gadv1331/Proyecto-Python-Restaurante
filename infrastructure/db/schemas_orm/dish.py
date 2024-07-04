@@ -2,7 +2,7 @@ from sqlalchemy import Enum, Column, Integer, String, Float
 from sqlalchemy.orm import relationship
 from infrastructure.db.database import Base
 from infrastructure.db.schemas_orm.menu import menu_dish_association
-
+from infrastructure.db.schemas_orm.order import order_dish_association
 
 class Dish(Base):
     __tablename__ = "dish"
@@ -14,6 +14,7 @@ class Dish(Base):
 
     recipes = relationship("Recipe", back_populates="dish")
     menus = relationship("Menu", secondary = menu_dish_association, back_populates="dish_list")
+    orders = relationship("Order", secondary=order_dish_association, back_populates="dish_list")
 
 
     

@@ -10,10 +10,7 @@ class OrderService:
         return self.order_repository.create_order(order_data)
 
     def update_order(self, order_id: int, order_data: OrderUpdate) -> Optional[Order]:
-        db_order = self.order_repository.get_order(order_id)
-        if db_order:
-            return self.order_repository.update_order(db_order, order_data)
-        return None
+        return self.order_repository.update_order(order_id, order_data)
 
     def delete_order(self, order_id: int) -> Optional[Order]:
         db_order = self.order_repository.get_order(order_id)
@@ -22,11 +19,13 @@ class OrderService:
         return None
 
     def get_order(self, order_id: int) -> Optional[Order]:
-        db_order = self.order_repository.get_order(order_id)
-        if db_order:
-            return Order.from_orm(db_order)
-        return None
+        return self.order_repository.get_order(order_id)
+
+    def get_orders_by_user(self, user_id: int) -> List[Order]:
+        return self.order_repository.get_orders_by_user(user_id)
+
+    def get_orders_by_dish(self, dish_id: int) -> List[Order]:
+        return self.order_repository.get_orders_by_dish(dish_id)
 
     def get_all_orders(self) -> List[Order]:
-        db_orders = self.order_repository.get_all_orders()
-        return [Order.from_orm(order) for order in db_orders]
+        return self.order_repository.get_all_orders()
