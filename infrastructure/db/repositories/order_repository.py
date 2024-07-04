@@ -40,7 +40,7 @@ class OrderRepository:
             db_order.ord_price = order_data.ord_price
             db_order.ord_status = order_data.ord_status
             db_order.dish_list = self.db.query(DishModel).filter(DishModel.dis_id.in_([dish.dis_id for dish in order_data.dish_list])).all()
-            db_order.ord_user_id = order_data.user.ord_user_id
+            db_order.ord_user_id = order_data.ord_user_id
             self.db.commit()
             self.db.refresh(db_order)
             return Order.from_orm(db_order)

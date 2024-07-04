@@ -15,6 +15,7 @@ class OrderUpdate(BaseModel):
     ord_price: float
     ord_status: str
     dish_list: List[Dish] = []
+    ord_user_id: int
 
 class Order(BaseModel):
     ord_id: int
