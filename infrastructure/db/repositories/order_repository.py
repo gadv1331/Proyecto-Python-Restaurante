@@ -19,7 +19,7 @@ class OrderRepository:
                 ord_price=order_data.ord_price,
                 ord_date=datetime.now(),
                 ord_status="Pendiente",
-                user_id=order_data.ord_user_id
+                ord_user_id=order_data.ord_user_id
             )
             self.db.add(db_order)
             self.db.commit()
@@ -31,8 +31,7 @@ class OrderRepository:
 
             return Order.from_orm(db_order)
         except IntegrityError as e:
-            return JSONResponse(status_code=404,content={"message": "No se ha encontrado el usuario."},
-    )
+            return JSONResponse(status_code=404, content={"message": "Usuario no encontrado."})
 
     def update_order(self, order_id: int, order_data: OrderUpdate) -> Optional[Order]:
         db_order = self.db.query(OrderModel).filter(OrderModel.ord_id == order_id).first()
@@ -41,7 +40,7 @@ class OrderRepository:
             db_order.ord_price = order_data.ord_price
             db_order.ord_status = order_data.ord_status
             db_order.dish_list = self.db.query(DishModel).filter(DishModel.dis_id.in_([dish.dis_id for dish in order_data.dish_list])).all()
-            db_order.user_id = order_data.user.user_id
+            db_order.ord_user_id = order_data.user.ord_user_id
             self.db.commit()
             self.db.refresh(db_order)
             return Order.from_orm(db_order)
@@ -54,7 +53,7 @@ class OrderRepository:
         return None
 
     def get_orders_by_user(self, user_id: int) -> List[Order]:
-        db_orders = self.db.query(OrderModel).filter(OrderModel.user_id == user_id).all()
+        db_orders = self.db.query(OrderModel).filter(OrderModel.ord_user_id == user_id).all()
         return [Order.from_orm(order) for order in db_orders]
 
     def get_orders_by_dish(self, dish_id: int) -> List[Order]:
@@ -65,11 +64,12 @@ class OrderRepository:
         db_orders = self.db.query(OrderModel).all()
         return [Order.from_orm(order) for order in db_orders]
     
-    def add_dish_to_order(self, order_id: int, dish_id: int) -> Optional[Order]:
+    def add_dish_to_order(self, order_id: int, dish_id: int) -> Order:
         db_order = self.db.query(OrderModel).filter(OrderModel.ord_id == order_id).first()
         if db_order:
             db_dish = self.db.query(DishModel).filter(DishModel.dis_id == dish_id).first()
             if db_dish:
+                db_order.ord_price = db_order.ord_price + db_dish.dis_price_by_unit
                 db_order.dish_list.append(db_dish)
                 self.db.commit()
                 self.db.refresh(db_order)
@@ -77,3 +77,13 @@ class OrderRepository:
             else:
                 return None
         return None
+
+    def delete_order(self, order_id: int) -> None:
+        db_order = self.db.query(OrderModel).filter(OrderModel.ord_id == order_id).first()
+        if db_order:
+            try:
+                self.db.delete(db_order)
+                self.db.commit()
+            except IntegrityError as e:
+                self.db.rollback()
+                return None

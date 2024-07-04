@@ -29,3 +29,6 @@ class OrderService:
 
     def get_all_orders(self) -> List[Order]:
         return self.order_repository.get_all_orders()
+
+    def add_dish_to_order(self, order_id: int, dish_id: int) -> Optional[Order]:
+        return self.order_repository.add_dish_to_order(order_id, dish_id)

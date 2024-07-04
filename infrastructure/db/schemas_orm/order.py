@@ -6,7 +6,8 @@ order_dish_association = Table(
     'order_dish_association',
     Base.metadata,
     Column('order_id', Integer, ForeignKey('orders.ord_id')),
-    Column('dish_id', Integer, ForeignKey('dish.dis_id'))
+    Column('dish_id', Integer, ForeignKey('dish.dis_id')),
+    Column('quantity', Integer)
 )
 
 class Order(Base):
@@ -17,4 +18,4 @@ class Order(Base):
     ord_date = Column(DateTime)
     ord_status = Column(String)
     dish_list = relationship("Dish", secondary=order_dish_association, back_populates="orders")
-    user_id = Column(Integer, ForeignKey('users.id'))
+    ord_user_id = Column(Integer, ForeignKey('users.id'))
