@@ -65,7 +65,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         )
 
 @router.get("/get_users_clientes/", response_model= List[UserCliente])
-def get_clients(db: Session = Depends(get_db)):
+def get_clients(db: Session = Depends(get_db),current_user: UserSchema = Depends(get_current_camarero_user)):
     user_repository = UserRepository(db)
     user_service = UserService(user_repository)
     clientes = user_service.get_users_by_role("cliente")
@@ -75,6 +75,7 @@ def get_clients(db: Session = Depends(get_db)):
             detail="No clients found"
         )
     return clientes
+
 # --------------------------------
 # ENDPOINTS PARA VERIFICAR LOS ROLES DE USUARIO
 # --------------------------------
